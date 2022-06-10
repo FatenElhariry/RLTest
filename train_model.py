@@ -15,6 +15,12 @@ TRAINING_BATCH_SIZE = 64
 SAVE_TRAINING_FREQUENCY = 25
 UPDATE_TARGET_MODEL_FREQUENCY = 5
 rewardList = []
+timeList = []
+
+
+
+convergedReward= ""
+convergedTime = ""
 
 
 if __name__ == '__main__':
@@ -73,6 +79,10 @@ if __name__ == '__main__':
 
             total_reward += reward
 
+            if done:
+                convergedReward = total_reward
+                convergedTime = time_frame_counter
+                
             next_state = process_state_image(next_state)
             state_frame_stack_queue.append(next_state)
             next_state_frame_stack = generate_state_frame_stack_from_queue(state_frame_stack_queue)
@@ -83,6 +93,7 @@ if __name__ == '__main__':
                 print('Episode: {}/{}, Scores(Time Frames): {}, Total Rewards(adjusted): {:.2}, Epsilon: {:.2}'.format(e, ENDING_EPISODE, time_frame_counter, float(total_reward), float(agent.epsilon)))
                 write_updates('Episode: {}/{}, Scores(Time Frames): {}, Total Rewards(adjusted): {:.2}, Epsilon: {:.2}'.format(e, ENDING_EPISODE, time_frame_counter, float(total_reward), float(agent.epsilon)))
                 rewardList.append(total_reward)
+                timeList.append(time_frame_counter)
                 break
             if len(agent.memory) > TRAINING_BATCH_SIZE:
                 agent.replay(TRAINING_BATCH_SIZE)
@@ -98,10 +109,16 @@ if __name__ == '__main__':
             plt.xlabel("Episodes")
             plt.ylabel("comulative score")
             plt.savefig(f'./save/rewords{e}.png')
-        if e > 10:
-            plt.plot(rewardList)
+            
+            plt.plot(rewardList, "r--", convergedTime, convergedReward, "bs")
             plt.xlabel("Episodes")
             plt.ylabel("comulative score")
             plt.savefig(f'./save/rewords{e}.png')
-            break
+            plt.show()
+            
+            plt.plot(timeList)
+            plt.xlabel("Episodes")
+            plt.ylabel("comulative Time Steps")
+            plt.savefig(f'./save/rewords{e}.png')
+       
     env.close()
